@@ -16,6 +16,10 @@ from tensorflow_serving.apis import (
     prediction_service_pb2_grpc,
 )
 
+import torch
+import torch.nn.functional as F
+from retro_star.common import prepare_mlp
+
 # pylint: disable=no-name-in-module
 from tensorflow.keras.metrics import top_k_categorical_accuracy
 from tensorflow.keras.models import load_model as load_keras_model
@@ -61,19 +65,61 @@ def load_model(
     :param use_remote_models: if True will try to connect to remote model server
     :return: a model object with a predict object
     """
-    if not use_remote_models:
+
+    try:
+        return LocalPytorchModel
+    else:
+        if not use_remote_models:
+            return LocalKerasModel(source)
+
+        try:
+            return ExternalModelViaGRPC(key)
+        except ExternalModelAPIError:
+            pass
+        try:
+            return ExternalModelViaREST(key)
+        except ExternalModelAPIError:
+            pass
         return LocalKerasModel(source)
 
-    try:
-        return ExternalModelViaGRPC(key)
-    except ExternalModelAPIError:
-        pass
-    try:
-        return ExternalModelViaREST(key)
-    except ExternalModelAPIError:
-        pass
-    return LocalKerasModel(source)
+class LocalPytorchModel:
+    """
+    A torch policy model that is executed locally.
 
+    The size of the input vector can be determined with the len() method.
+
+    :ivar model: the compiled model
+    :ivar output_size: the length of the output vector
+
+    :param filename: the path to a Keras checkpoint file
+    """
+
+    def __init__(self, filename: str, mlp_templates='assets/one_step_model/template_rules_1.dat') -> None:
+        self.model = prepare_mlp(mlp_templates, filename, gpu=0 if torch.cuda.is_available() else -1)  #TODO gpu filename, custom_objects=CUSTOM_OBJECTS)
+        try:
+            self._model_dimensions = int(self.model.fp_dim)   #input.shape[1])
+        except AttributeError:
+            self._model_dimensions = int(self.model.input[0].shape[1])
+        self.output_size = self.model.net.n_rules    #int(self.model.output.shape[1])
+
+    def __len__(self) -> int:
+        return self._model_dimensions
+
+    def predict(self, *args: np.ndarray, **_: np.ndarray) -> np.ndarray:
+        """
+        Perform a forward pass of the neural network.
+
+        :param args: the input vectors
+        :return: the vector of the output layer
+        """
+        arr = torch.tensor(args[0], dtype=torch.float32)
+        # if self.device >= 0:
+        #     arr = arr.to(self.device)
+        preds = self.model.net(arr)
+        preds = F.softmax(preds, dim=1)
+        # if self.device >= 0:
+        #     preds = preds.cpu()
+        return preds.detach()
 
 class LocalKerasModel:
     """
