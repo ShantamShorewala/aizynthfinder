@@ -68,7 +68,7 @@ def load_model(
 
     try:
         return LocalPytorchModel
-    else:
+    except:
         if not use_remote_models:
             return LocalKerasModel(source)
 
