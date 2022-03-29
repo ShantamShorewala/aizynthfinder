@@ -15,5 +15,6 @@ if TYPE_CHECKING:
 def _make_fingerprint(
     obj: Union[TreeMolecule, RetroReaction], model: Any
 ) -> np.ndarray:
+    print (f'Model type: {type(model)}')
     fingerprint = obj.fingerprint(radius=2, nbits=len(model))
     return fingerprint.reshape([1, len(model)])

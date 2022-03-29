@@ -50,7 +50,7 @@ TF_SERVING_GRPC_PORT = os.environ.get("TF_SERVING_GRPC_PORT")
 
 def load_model(
     source: str, key: str, use_remote_models: bool
-) -> Union["LocalKerasModel", "ExternalModelViaGRPC", "ExternalModelViaREST"]:
+) -> Union["LocalPytorchModel", "LocalKerasModel", "ExternalModelViaGRPC", "ExternalModelViaREST"]:
     """
     Load model from a configuration specification.
 
@@ -66,9 +66,14 @@ def load_model(
     :return: a model object with a predict object
     """
 
-    try:
-        return LocalPytorchModel
+    # try:
+        
+    print ("try to load pytorch model")
+    return LocalPytorchModel(source)
+
+    '''
     except:
+        print ("couldn't load pytorch model, trying Keras")
         if not use_remote_models:
             return LocalKerasModel(source)
 
@@ -81,6 +86,7 @@ def load_model(
         except ExternalModelAPIError:
             pass
         return LocalKerasModel(source)
+    '''
 
 class LocalPytorchModel:
     """
@@ -95,12 +101,16 @@ class LocalPytorchModel:
     """
 
     def __init__(self, filename: str, mlp_templates='assets/one_step_model/template_rules_1.dat') -> None:
+        print (f'Filename: {filename}')
         self.model = prepare_mlp(mlp_templates, filename, gpu=0 if torch.cuda.is_available() else -1)  #TODO gpu filename, custom_objects=CUSTOM_OBJECTS)
+        print ("A")
         try:
             self._model_dimensions = int(self.model.fp_dim)   #input.shape[1])
         except AttributeError:
             self._model_dimensions = int(self.model.input[0].shape[1])
+        print ("B")
         self.output_size = self.model.net.n_rules    #int(self.model.output.shape[1])
+        print ("C")
 
     def __len__(self) -> int:
         return self._model_dimensions

@@ -23,6 +23,7 @@ def load_dynamic_class(
     :param exception_cls: the exception class to raise on exception
     :return: the loaded class
     """
+    print (name_spec)
     if "." not in name_spec:
         name = name_spec
         if not default_module:

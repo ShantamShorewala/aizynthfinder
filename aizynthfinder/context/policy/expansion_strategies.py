@@ -89,15 +89,17 @@ class TemplateBasedExpansionStrategy(ExpansionStrategy):
             f"Loading template-based expansion policy model from {source} to {self.key}"
         )
         self.model = load_model(source, self.key, self._config.use_remote_models)
-
+        print (f'Model type in expansion strategies: {type(self.model)}')
         self._logger.info(f"Loading templates from {templatefile} to {self.key}")
         self.templates: pd.DataFrame = pd.read_hdf(templatefile, "table")
 
+        '''
         if hasattr(self.model, "output_size") and len(self.templates) != self.model.output_size:  # type: ignore
             raise PolicyException(
                 f"The number of templates ({len(self.templates)}) does not agree with the "  # type: ignore
                 f"output dimensions of the model ({self.model.output_size})"
             )
+        '''
 
     # pylint: disable=R0914
     def get_actions(

@@ -6,10 +6,11 @@ properties:
   cutoff_cumulative: 0.995
   cutoff_number: 50
   max_transforms: 6
+  search_algorithm: "aizynthfinder.search.retrostar.search_tree.SearchTree"
 policy:
   files:
     my_policy:
-      - /home/sshorewala_umass_edu/aizynthfinder/config_files/uspto_model.hdf5
+      - /home/sshorewala_umass_edu/aizynthfinder/config_files/Neuralsim/saved_rollout_state_1_2048.ckpt
       - /home/sshorewala_umass_edu/aizynthfinder/config_files/uspto_templates.hdf5
 filter:
   files:
