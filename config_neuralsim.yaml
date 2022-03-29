@@ -10,8 +10,8 @@ properties:
 policy:
   files:
     my_policy:
-      - /home/sshorewala_umass_edu/aizynthfinder/config_files/Neuralsim/saved_rollout_state_1_2048.ckpt
-      - /home/sshorewala_umass_edu/aizynthfinder/config_files/uspto_templates.hdf5
+      - /home/sshorewala_umass_edu/scratch/aizynthfinder/config_files/Neuralsim/saved_rollout_state_1_2048.ckpt
+      - /home/sshorewala_umass_edu/scratch/aizynthfinder/config_files/uspto_templates.hdf5
 filter:
   files:
     my_policy: 
@@ -19,4 +19,4 @@ filter:
     filter_tag:
 stock:
   files:
-    zinc: /home/sshorewala_umass_edu/aizynthfinder/config_files/zinc_stock.hdf5
+    zinc: /home/sshorewala_umass_edu/scratch/aizynthfinder/config_files/zinc_stock.hdf5
